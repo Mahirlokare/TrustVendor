@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+trustvendor.db
+trustvendor.db-shm
+trustvendor.db-wal
+.venv/
+web/node_modules/
+web/dist/
+web/.env
+web/.env.local
+web/.env.*.local
+supabase/functions/.env
+supabase/.temp/

@@ -1,0 +1,22 @@
+project_id = "trustvendor"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://127.0.0.1:5173", "https://YOUR_PRODUCTION_DOMAIN"]
+enable_signup = true
+
+[auth.email]
+double_confirm_changes = true
+enable_confirmations = true
+secure_password_change = true
+otp_expiry = 3600
+
+[functions.invite-member]
+verify_jwt = true
