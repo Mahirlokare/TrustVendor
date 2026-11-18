@@ -201,12 +201,22 @@ function OrganizationGate({ session, onSignOut }: { session: Session; onSignOut:
   async function createOrganization(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (!supabase) return
     setCreating(true); setOrgError('')
-    const form = new FormData(event.currentTarget)
-    const workspaceName = String(form.get('workspace') || '').trim()
-    const { data, error: e } = await supabase.rpc('create_organization', { p_name: workspaceName })
-    if (e) setOrgError(e.message)
-    else { await loadOrgs(); setActiveId(String(data)) }
-    setCreating(false)
+    const field = event.currentTarget.elements.namedItem('workspace')
+    const workspaceName = field instanceof HTMLInputElement ? field.value.trim() : ''
+    if (workspaceName.length < 2 || workspaceName.length > 120) {
+      setOrgError('Enter a workspace name between 2 and 120 characters.')
+      setCreating(false)
+      return
+    }
+    try {
+      const { data, error: e } = await supabase.rpc('create_organization', { p_name: workspaceName })
+      if (e) setOrgError(e.message)
+      else { await loadOrgs(); setActiveId(String(data)) }
+    } catch (e) {
+      setOrgError(e instanceof Error ? e.message : 'Could not create the workspace. Please try again.')
+    } finally {
+      setCreating(false)
+    }
   }
 
   if (orgLoading) return <FullScreen message="Loading your workspaces…" />
