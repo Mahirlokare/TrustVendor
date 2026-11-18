@@ -108,7 +108,7 @@ export default function App() {
   if (authLoading) return <FullScreen message="Checking your secure session…" />
   if (recovering && session) return <PasswordReset onDone={() => setRecovering(false)} />
   if (!session) return <AuthScreen notice={notice} error={error} onNotice={setNotice} onError={setError} />
-  return <OrganizationGate session={session} onSignOut={() => supabase.auth.signOut()} />
+  return <OrganizationGate session={session} onSignOut={() => { if (supabase) void supabase.auth.signOut() }} />
 }
 
 function SetupScreen() {
