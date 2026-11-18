@@ -48,9 +48,10 @@ create table public.suppliers (
   created_by uuid not null default auth.uid() references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  unique (organization_id, lower(registration_id)),
   unique (organization_id, id)
 );
+create unique index suppliers_org_registration_id_uq
+  on public.suppliers(organization_id, lower(registration_id));
 create index suppliers_org_updated_idx on public.suppliers(organization_id, updated_at desc);
 
 create table public.verification_checks (
