@@ -184,7 +184,6 @@ function OrganizationGate({ session, onSignOut }: { session: Session; onSignOut:
   const [orgLoading, setOrgLoading] = useState(true)
   const [orgError, setOrgError] = useState('')
   const [activeId, setActiveId] = useState('')
-  const [createName, setCreateName] = useState('')
   const [creating, setCreating] = useState(false)
 
   const loadOrgs = useCallback(async () => {
@@ -202,9 +201,11 @@ function OrganizationGate({ session, onSignOut }: { session: Session; onSignOut:
   async function createOrganization(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (!supabase) return
     setCreating(true); setOrgError('')
-    const { data, error: e } = await supabase.rpc('create_organization', { p_name: createName.trim() })
+    const form = new FormData(event.currentTarget)
+    const workspaceName = String(form.get('workspace') || '').trim()
+    const { data, error: e } = await supabase.rpc('create_organization', { p_name: workspaceName })
     if (e) setOrgError(e.message)
-    else { await loadOrgs(); setActiveId(String(data)); setCreateName('') }
+    else { await loadOrgs(); setActiveId(String(data)) }
     setCreating(false)
   }
 
