@@ -127,6 +127,18 @@ function AuthScreen({ notice, error, onNotice, onError }: { notice: string; erro
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
+  async function signInDemo() {
+    if (!supabase) return
+    setBusy(true); onError(''); onNotice('')
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: 'demo@trustvendor.app',
+        password: 'TrustVendorDemo2026!',
+      })
+      if (authError) throw authError
+    } catch (e) { onError(e instanceof Error ? e.message : 'Could not sign in to the demo account.') }
+    finally { setBusy(false) }
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (!supabase) return
     setBusy(true); onError(''); onNotice('')
@@ -164,6 +176,7 @@ function AuthScreen({ notice, error, onNotice, onError }: { notice: string; erro
       {mode === 'signin' && <button type="button" className="text-button align-right" onClick={() => { setMode('forgot'); setSent(false); onError(''); onNotice('') }}>Forgot password?</button>}
       <button className="button button-primary full-button" disabled={busy || sent}>{busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : mode === 'forgot' ? 'Send reset link' : 'Sign in'}</button>
     </form>
+    {mode === 'signin' && <button type="button" className="button button-secondary full-button" disabled={busy || sent} onClick={signInDemo}>Try demo account</button>}
     <div className="auth-switch">{mode === 'signup' ? <>Already have an account? <button onClick={() => { setMode('signin'); setSent(false); onError(''); onNotice('') }}>Sign in</button></> : mode === 'forgot' ? <button onClick={() => { setMode('signin'); setSent(false); onError(''); onNotice('') }}>Back to sign in</button> : <>New to TrustVendor? <button onClick={() => { setMode('signup'); setSent(false); onError(''); onNotice('') }}>Create an account</button></>}</div>
     <p className="auth-legal">Review your organization’s privacy notice and terms before using this workspace. Never enter bank credentials or personal identity numbers in reviewer notes.</p>
   </section><div className="auth-side"><div className="auth-side-glow" /><div className="quote-mark">“</div><blockquote>Trust decisions should come with their evidence.</blockquote><p>Keep the source, the reviewer, and the reason close to every check.</p><div className="auth-side-foot"><span className="status-pulse" /> Private by default · explainable by design</div></div></main>
