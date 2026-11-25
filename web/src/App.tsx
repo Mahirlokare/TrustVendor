@@ -241,6 +241,7 @@ function Workspace({ session, org, organizations, onOrgChange, onSignOut }: { se
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
   const [showCreate, setShowCreate] = useState(false)
   const [showTeam, setShowTeam] = useState(false)
+  const [showPolicy, setShowPolicy] = useState(false)
   const [toast, setToast] = useState('')
 
   const notify = (text: string) => { setToast(text); window.setTimeout(() => setToast(''), 2800) }
@@ -321,7 +322,7 @@ function Workspace({ session, org, organizations, onOrgChange, onSignOut }: { se
       <Brand />
       <div className="workspace-label">WORKSPACE</div>
       <nav className="nav-list"><a className="nav-link active" href="#suppliers"><Icon name="suppliers" /><span>Suppliers</span><b>{counts.total}</b></a><a className="nav-link" href="#activity"><Icon name="activity" /><span>Activity</span></a>{canAdmin && <button className="nav-link nav-action" onClick={() => setShowTeam(true)}><Icon name="users" /><span>Team access</span></button>}</nav>
-      <div className="sidebar-bottom"><div className="guide-card"><div className="guide-icon">✳</div><strong>Evidence first</strong><p>Record the source and date behind each check. A score is only as good as its evidence.</p><span>Review policy in the guide →</span></div><div className="user-card"><div className="avatar">{initials(displayName(session.user))}</div><div className="user-copy"><strong>{displayName(session.user)}</strong><span>{session.user.email}</span></div><button className="icon-button logout-button" title="Sign out" aria-label="Sign out" onClick={onSignOut}><Icon name="logout" /></button></div></div>
+      <div className="sidebar-bottom"><div className="guide-card"><div className="guide-icon">✳</div><strong>Evidence first</strong><p>Record the source and date behind each check. A score is only as good as its evidence.</p><button type="button" className="guide-policy-button" onClick={() => setShowPolicy(true)}>Review policy in the guide <span aria-hidden="true">→</span></button></div><div className="user-card"><div className="avatar">{initials(displayName(session.user))}</div><div className="user-copy"><strong>{displayName(session.user)}</strong><span>{session.user.email}</span></div><button className="icon-button logout-button" title="Sign out" aria-label="Sign out" onClick={onSignOut}><Icon name="logout" /></button></div></div>
     </aside>
     <main className="main-area">
       <header className="topbar"><div className="breadcrumbs"><span>{org.name}</span><i>/</i><b>Supplier assurance</b></div><div className="topbar-actions">{organizations.length > 1 && <select aria-label="Workspace" className="org-select" value={org.id} onChange={e => onOrgChange(e.target.value)}>{organizations.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select>}<button className="icon-button notification-button" title="Notifications" onClick={() => notify('No new notifications.')}><Icon name="bell" /><i /></button></div></header>
@@ -343,9 +344,19 @@ function Workspace({ session, org, organizations, onOrgChange, onSignOut }: { se
         <p className="page-footnote">Verification status reflects the evidence entered by your team. TrustVendor does not independently certify suppliers.</p>
       </div>
     </main>
-    {(selectedSupplier || showCreate || showTeam) && <div className="overlay" onMouseDown={event => { if (event.target === event.currentTarget) { setSelectedSupplier(null); setShowCreate(false); setShowTeam(false) } }}><aside className="drawer" role="dialog" aria-modal="true">{selectedSupplier && <SupplierDrawer supplier={selectedSupplier} org={org} canReview={canReview} onClose={() => setSelectedSupplier(null)} onSaved={loadData} notify={notify} />}{showCreate && <CreateDrawer onClose={() => setShowCreate(false)} onSubmit={createSupplier} />}{showTeam && <TeamDrawer members={members} invitations={invitations} canAdmin={canAdmin} currentUserId={session.user.id} onClose={() => setShowTeam(false)} onInvite={inviteMember} />}</aside></div>}
+    {(selectedSupplier || showCreate || showTeam || showPolicy) && <div className="overlay" onMouseDown={event => { if (event.target === event.currentTarget) { setSelectedSupplier(null); setShowCreate(false); setShowTeam(false); setShowPolicy(false) } }}><aside className="drawer" role="dialog" aria-modal="true">{selectedSupplier && <SupplierDrawer supplier={selectedSupplier} org={org} canReview={canReview} onClose={() => setSelectedSupplier(null)} onSaved={loadData} notify={notify} />}{showCreate && <CreateDrawer onClose={() => setShowCreate(false)} onSubmit={createSupplier} />}{showTeam && <TeamDrawer members={members} invitations={invitations} canAdmin={canAdmin} currentUserId={session.user.id} onClose={() => setShowTeam(false)} onInvite={inviteMember} />}{showPolicy && <PolicyDrawer onClose={() => setShowPolicy(false)} />}</aside></div>}
     {toast && <div role="status" className="toast">{toast}</div>}
   </div>
+}
+
+function PolicyDrawer({ onClose }: { onClose: () => void }) {
+  return <><div className="drawer-header"><div><span className="eyebrow">REVIEW GUIDANCE</span><h2>Verification & exposure policy</h2><p>How TrustVendor records supplier checks and calculates open exposure</p></div><button className="icon-button" onClick={onClose} aria-label="Close policy"><Icon name="close" /></button></div><div className="drawer-content">
+    <section className="checklist"><div className="section-title"><div><h3>Checklist weights</h3><p>All five checks total 100 exposure points</p></div></div>{CHECKS.map(item => <div className="check-card" key={item.key}><div className="check-title-row"><strong>{item.label}</strong><span>{item.weight} points</span></div><p className="check-hint">{item.hint}</p></div>)}</section>
+    <section className="checklist"><h3>How the score works</h3><p className="muted-copy">Each check that is not marked Verified contributes its assigned weight to the open exposure score. A verified check contributes zero. The displayed score is the sum of those outstanding points, from 0 to 100.</p><p className="muted-copy">A supplier is labelled High when any check is flagged or the score is 60 or more; Medium at 30–59; and Low below 30. A supplier is marked Verified only when all five checks are verified and none is flagged.</p></section>
+    <section className="checklist"><h3>Evidence and reviewer responsibilities</h3><ul className="policy-list"><li>Use an appropriate, independent source for each check.</li><li>Record the source/provider, reference and date in Evidence source.</li><li>Explain the review decision in Reviewer note; avoid secrets and sensitive personal data.</li><li>Revisit stale, incomplete or conflicting evidence before relying on a review.</li><li>Keep decisions within your organization’s authorized review process.</li></ul></section>
+    <div className="callout"><Icon name="alert"/><div><strong>Important limitation</strong><span>These are workflow exposure points, not a probability of fraud, legal opinion, independent certification, or a guarantee that a supplier is legitimate. TrustVendor does not independently verify records or connect to registries, banks or sanctions databases.</span></div></div>
+    <div className="drawer-buttons"><button className="button button-primary" onClick={onClose}>Close policy</button></div>
+  </div></>
 }
 
 function Metric({ label, value, caption, icon, tone }: { label: string; value: number; caption: string; icon: string; tone?: string }) {
