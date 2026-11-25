@@ -132,7 +132,7 @@ function AuthScreen({ notice, error, onNotice, onError }: { notice: string; erro
     setBusy(true); onError(''); onNotice('')
     try {
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email: 'demo@trustvendor.app',
+        email: 'trustvendor.demo@gmail.com',
         password: 'TrustVendorDemo2026!',
       })
       if (authError) throw authError
