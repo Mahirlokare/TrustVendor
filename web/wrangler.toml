@@ -1,3 +1,7 @@
 name = "trustvendor-web"
 compatibility_date = "2026-11-18"
 pages_build_output_dir = "./dist"
+
+[vars]
+VITE_SUPABASE_URL = "https://pncwerdrufjypcypwhft.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_VmsvcxA2nBfMC0NbmQEa9w_qN-k2FC6"
